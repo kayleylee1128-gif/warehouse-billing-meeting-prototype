@@ -5,3 +5,6 @@ test('fractional box bands fail',()=>{assert.match(validate({...fresh('receive')
 test('QC category matches one band, different category falls back',()=>{const r={...fresh('qc'),condition:'品类与抽检数量',bands:[{category:'服装鞋帽',min:1,max:10,price:2}]};assert.equal(calculate(r,5,5,'服装鞋帽'),10);assert.equal(calculate(r,5,5,'日用百货'),.5)});
 test('default versions have live and pending simultaneously; one rule per node',()=>{const w=initial()[0];assert.equal(w.versions[0].status,'生效中');assert.equal(w.versions[1].audit,'审批中');for(const v of w.versions)assert.equal(new Set(v.rules.map(r=>r.id)).size,v.rules.length)});
 test('base price and continuation are one formula',()=>assert.equal(calculate({...fresh('pick'),method:'基础费＋续件费',base:1,included:2,next:.1},5),1.3));
+
+import{rollover}from'./model.mjs';
+test('approval and effective date separately control active version',()=>{let w=initial();w[0].versions[1].audit='已通过';assert.equal(rollover(w,'2026-11-19')[0].versions[1].status,'待生效');const next=rollover(w,'2026-11-20')[0];assert.equal(next.versions[0].status,'已失效');assert.equal(next.versions[1].status,'生效中')});
