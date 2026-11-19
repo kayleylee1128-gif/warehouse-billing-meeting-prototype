@@ -7,3 +7,9 @@
 .nav a{text-decoration:none;color:inherit}.nav a.active{color:#1763e5}
 
 .bandtable .ant-table-thead>tr>th.pricing-condition-head,.bandtable .ant-table-thead>tr>th.pricing-condition{background:#f3f5f8!important;color:#64758c!important}.bandtable .ant-table-thead>tr>th.pricing-value-head,.bandtable .ant-table-thead>tr>th.pricing-value{background:#eaf3ff!important;color:#1763d8!important;border-left:1px solid #cfdef4}.bandtable .ant-table-tbody>tr>td.pricing-condition{background:#fafbfc}.bandtable .ant-table-tbody>tr>td.pricing-value{background:#f2f7ff!important;border-left:1px solid #d4e3f8}.bandtable .pricing-value .ant-input-number{border-color:#b8d0f2}.bandtable .ant-table-thead>tr:first-child>th{font-weight:600}.fallback{padding:12px 14px!important;background:#f7faff;border-radius:6px;width:100%}.bandtable .ant-table-tbody>tr:hover>td.pricing-condition{background:#f4f6fa!important}
+
+.qc-price-label{padding-left:12px}.qc-price-label>.dot{left:-12px;top:-3px}.qc-matrix-table .ant-table-thead>tr>th{vertical-align:middle}.qc-matrix-table .ant-table-tbody>tr:last-child>td{border-top:1px solid #dce6f2}
+
+.qc-price-input>.dot{left:-15px;top:7px;width:20px;height:20px}.qc-price-input{position:relative}
+
+.pack-condition{display:flex;align-items:center;gap:8px;margin-bottom:10px}.pack-condition>.muted{white-space:nowrap}.pack-row-actions{display:flex;flex-wrap:wrap;gap:4px}.pack-conditions{padding:3px 0}.pack-conditions>.ant-btn{margin-top:3px}
