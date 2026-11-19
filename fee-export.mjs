@@ -1,0 +1,5 @@
+import{nodes}from'./fees-model.mjs';
+export const csv=(headers,rows)=>'\ufeff'+[headers,...rows].map(row=>row.map(v=>'"'+String(v??'').replace(/^[=+@-]/,"'$&").replace(/"/g,'""')+'"').join(',')).join('\r\n');
+export function summaryExport(w,group,rows){return csv(['仓库','统计月份',group==='node'?'计费节点':'员工','完成单量','费用','币种','最近核算时间'],rows.map(r=>[w.name,w.month,group==='node'?nodes[r.id]:r.id,r.docCount,(r.cents/100).toFixed(2),w.currency,w.calculatedAt]))}
+export function detailExport(w,rows){return csv(['仓库','统计月份','完成时间','单据号',...(w.type==='self'?['员工']:[]),'计费节点','费用项','计费工作量','计量单位','计价版本','命中价格','计算公式','费用','币种','最近核算时间'],rows.map(c=>[w.name,w.month,c.completedAt,c.doc,...(w.type==='self'?[c.person]:[]),nodes[c.node],c.rule,c.qty,c.unit,'V'+c.version,c.matched,c.formula,(c.cents/100).toFixed(2),w.currency,w.calculatedAt]))}
+export function downloadCsv(name,text){const url=URL.createObjectURL(new Blob([text],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}

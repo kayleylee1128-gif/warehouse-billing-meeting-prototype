@@ -1,0 +1,1 @@
+import{nodes as configNodes}from'./model.mjs';export const nodes=Object.fromEntries(configNodes.map(n=>[n.id,n.name]));export const C={页面:'#64748b',字段:'#0891b2',交互:'#159570',规则:'#8458d3',待确认:'#d28b15'};
