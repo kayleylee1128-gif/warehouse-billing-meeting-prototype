@@ -1,0 +1,7 @@
+import{test}from'node:test';import assert from'node:assert/strict';import{nodes,fresh,validate,calculate,initial}from'./model.mjs';
+test('receiving units exclude pieces and merge parcel/box',()=>assert.deepEqual(nodes[0].units,['箱数（包裹数）','入库单']));
+test('box band uses whole quantity, boundaries are inclusive',()=>{const r={...fresh('receive'),condition:'箱数',bands:[{min:1,max:10,price:2},{min:11,max:100,price:1}]};assert.equal(validate(r),'');assert.equal(calculate(r,10),20);assert.equal(calculate(r,11),11);assert.equal(calculate(r,101),25.25);r.bands[1].min=10;assert.match(validate(r),/连续/)});
+test('fractional box bands fail',()=>{assert.match(validate({...fresh('receive'),condition:'箱数',bands:[{min:1,max:10.5,price:1}]}),/整数/)});
+test('QC category matches one band, different category falls back',()=>{const r={...fresh('qc'),condition:'品类与抽检数量',bands:[{category:'服装鞋帽',min:1,max:10,price:2}]};assert.equal(calculate(r,5,5,'服装鞋帽'),10);assert.equal(calculate(r,5,5,'日用百货'),.5)});
+test('default versions have live and pending simultaneously; one rule per node',()=>{const w=initial()[0];assert.equal(w.versions[0].status,'生效中');assert.equal(w.versions[1].audit,'审批中');for(const v of w.versions)assert.equal(new Set(v.rules.map(r=>r.id)).size,v.rules.length)});
+test('base price and continuation are one formula',()=>assert.equal(calculate({...fresh('pick'),method:'基础费＋续件费',base:1,included:2,next:.1},5),1.3));
