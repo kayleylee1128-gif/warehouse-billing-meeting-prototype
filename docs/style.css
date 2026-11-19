@@ -13,3 +13,5 @@
 .qc-price-input>.dot{left:-15px;top:7px;width:20px;height:20px}.qc-price-input{position:relative}
 
 .pack-condition{display:flex;align-items:center;gap:8px;margin-bottom:10px}.pack-condition>.muted{white-space:nowrap}.pack-row-actions{display:flex;flex-wrap:wrap;gap:4px}.pack-conditions{padding:3px 0}.pack-conditions>.ant-btn{margin-top:3px}
+
+.qc-condition-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}.qc-condition-row .muted{white-space:nowrap}.qc-condition-list>.ant-btn{margin-top:3px}
