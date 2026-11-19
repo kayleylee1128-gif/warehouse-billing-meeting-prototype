@@ -4,3 +4,5 @@
 .cfg-nav{z-index:20}.cfg-annotations{z-index:1400}.fees-app .cfg-main{min-width:0}.fees-flow-toolbar{flex-wrap:wrap}
 
 .fees-filter-field{display:flex;flex-direction:column;gap:7px}.fees-detail-filters{align-items:flex-end;gap:16px}.fees-detail-filters .fees-filter-field label{font-size:12px;color:#71859f}
+
+.finance-ledgers{margin:0 0 24px}.finance-ledgers .ant-segmented-item-label{padding:6px 22px}.fees-stats>div>small{display:block;margin-top:10px;color:#94a0b1;font-size:11px}.finance-ledgers .dot{top:6px!important}

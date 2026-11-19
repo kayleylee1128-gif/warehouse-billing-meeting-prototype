@@ -1,12 +1,13 @@
 import React,{useState,useMemo,useEffect}from'react';
 import{createRoot}from'react-dom/client';
 import{ConfigProvider,Button,Input,Select,Table,Tag,Segmented,Drawer,Modal,Descriptions,Empty,DatePicker}from'antd';
-import zhCN from'antd/locale/zh_CN';import dayjs from'dayjs';
+import zhCN from'antd/locale/zh_CN';import{IncomeProfit,ledgerOptions}from'./income-profit.jsx';import dayjs from'dayjs';
 import{C}from'./fees-model.mjs';
 import{nodes}from'./fees-model.mjs';
 import{summaryExport,detailExport,downloadCsv}from'./fee-export.mjs';
 import{Nav,Annotations}from'./prototype-ui.jsx';
 import{previousMonth,buildMonth,money,aggregate,addCents,filterCharges}from'./monthly-fees.mjs';
+const ledgerNote=['ledger','成本、收入与毛利账本','交互','成本按细作业节点及实际操作人归集；收入按入库、出库、退件、仓储服务项目归集；作业毛利对照同仓同日期的两本账。切换保留仓库、月份与日期，不把成本单价当作收入报价。'];
 const overviewNotes=[
  ['page','仓库月度费用总览','页面','仓库主管和财务从左侧仓库费用统计进入。默认上一个自然月，按作业完成日期归月；仓库总览下钻至节点/员工，再进入费用流水和原始记录。当前展示自建仓拣货作业费用。月账使用独立归档示例价，与配置页浏览器草稿不联动，未连接真实WMS。'],
  ['filters','统计月份与仓库筛选','字段','月份必填，默认北京时间上月，不可选本月或未来。仓库名称/编码、仓库类型可选，默认全部。筛选即时生效，金额及数量仅统计当前结果。月份变更清空下钻状态；任意历史月均为演示数据，并非真实历史采集。'],
@@ -23,9 +24,10 @@ const flowNotes=[
  ['flow','费用流水与查询','交互','在节点或员工金额上点击后打开右侧费用明细抽屉。标题与范围条显示已带入条件；单据号模糊查询只过滤当前范围，汇总金额和单量随之更新。关闭返回原汇总，不修改账单。导出包含当前节点、员工及单据查询条件下的全部匹配流水，跨分页导出，包含版本、公式、匹配条件、金额和币种；空结果禁用，不导出其他仓库或被筛掉的数据。每行是当前节点一次已完成任务的综合费用记录，库位费和件数费在同笔合计；不再增加费用项层级。'],
  ['flowRows','版本与计算依据','规则','流水使用作业完成日当时已审批的计价版本，不使用当前最新价或草稿。金额、公式、匹配条件、版本与原始数据引用一并保留。点击单据打开依据弹窗，可查SKU、件数、包裹、箱、库位、交运袋及商品属性；自建仓同时显示实际作业人，三方服务费用不展示人员归属。']
 ];
+overviewNotes.splice(1,0,ledgerNote);warehouseNotes.splice(1,0,ledgerNote);
 const rawNotes=[['raw','作业记录与费用追溯','字段','只读展示该笔费用实际归集的原始记录ID、完成时间、业务单据、任务、SKU、件数、包裹/箱/库位/交运袋、尺寸重量及计价结果。保留库位数、件数、两项单价及完整计算公式；无法匹配版本或源数据时正式系统应阻断并进入异常处理，不能按0或当前新价兜底。本页无重算或修改历史费用入口。']];
-function Fees(){
- const[month,setMonth]=useState(previousMonth),[query,setQuery]=useState(''),[type,setType]=useState('all'),[selected,setSelected]=useState(null),[group,setGroup]=useState('node'),[scope,setScope]=useState(null),[flowQuery,setFlowQuery]=useState(''),[raw,setRaw]=useState(null),[annot,setAnnot]=useState(true),[cat,setCat]=useState('全部'),[noteIndex,setNoteIndex]=useState(-1),[dateRange,setDateRange]=useState(null),[employee,setEmployee]=useState('all'),[nodeFilter,setNodeFilter]=useState('all');
+function Fees({onModeChange,month,setMonth,selected,setSelected,dateRange,setDateRange}){
+ const[query,setQuery]=useState(''),[type,setType]=useState('all'),[group,setGroup]=useState('node'),[scope,setScope]=useState(null),[flowQuery,setFlowQuery]=useState(''),[raw,setRaw]=useState(null),[annot,setAnnot]=useState(true),[cat,setCat]=useState('全部'),[noteIndex,setNoteIndex]=useState(-1),[employee,setEmployee]=useState('all'),[nodeFilter,setNodeFilter]=useState('all');
  const data=useMemo(()=>buildMonth(month),[month]),filtered=data.filter(w=>(type==='all'||w.type===type)&&(w.name.includes(query)||w.id.toLowerCase().includes(query.toLowerCase()))),rawW=data.find(w=>w.id===selected);
  const matching=rawW?filterCharges(rawW,{person:employee==='all'?undefined:employee,node:nodeFilter==='all'?undefined:nodeFilter,start:dateRange?.[0],end:dateRange?.[1]}):[];const w=rawW?{...rawW,charges:matching,cents:addCents(matching),docCount:new Set(matching.map(c=>c.doc)).size,nodeCount:new Set(matching.map(c=>c.node)).size,filterContext:{start:dateRange?.[0]||month+'-01',end:dateRange?.[1]||dayjs(month+'-01').endOf('month').format('YYYY-MM-DD'),person:employee==='all'?'全部员工':employee,node:nodeFilter==='all'?'全部节点':nodes[nodeFilter]}}:null;const notes=[...(w?warehouseNotes:overviewNotes),...(scope?flowNotes:[]),...(raw?rawNotes:[])];
  useEffect(()=>{document.body.classList.toggle('pricing-notes-open',annot);return()=>document.body.classList.remove('pricing-notes-open')},[annot]);
@@ -43,6 +45,7 @@ function Fees(){
  const groupScope=r=>group==='node'?{node:r.id}:{person:r.id};
  return <ConfigProvider locale={zhCN} theme={{token:{colorPrimary:'#1765d8',borderRadius:6,fontSize:13,fontFamily:'Inter,"Microsoft YaHei",sans-serif'},components:{Table:{headerBg:'#f7f9fc'}}}}><div className={'config-app lab-app fees-app '+(annot?'annotated':'')}><Nav active="fees"/><div className="cfg-work"><header className="cfg-top"><span>仓库管理 / 仓库费用统计{w?' / '+w.name:''}</span><div><Tag>拣货示例账单</Tag><Button onClick={()=>setAnnot(!annot)}>{annot?'关闭标注':'开启标注'}</Button></div></header><main className="cfg-main">
  {anchor('page',<><div>{w&&<Button type="text" className="fees-back" onClick={()=>{setSelected(null);setScope(null);setRaw(null)}}>← 仓库列表</Button>}<h1>{w?w.name:'仓库费用统计'}</h1>{w&&<Tag>{w.typeName}</Tag>}</div><span className="fees-month-title">{month} · 月度费用</span></>,'fees-heading')}
+ {anchor('ledger',<Segmented aria-label="费用账本" value="cost" options={ledgerOptions} onChange={onModeChange}/>,'finance-ledgers')}
  {!w?<>
  {anchor('filters',<><label>统计月份<input aria-label="统计月份" type="month" value={month} max={previousMonth()} onChange={e=>{if(/^\d{4}-(0[1-9]|1[0-2])$/.test(e.target.value)&&e.target.value<=previousMonth())setMonth(e.target.value)}}/></label><Input aria-label="查询费用仓库" allowClear value={query} placeholder="仓库名称 / 编码" onChange={e=>setQuery(e.target.value)} style={{width:210}}/><Select aria-label="仓库类型" value={type} style={{width:130}} options={[{value:'all',label:'全部仓库类型'},{value:'self',label:'自建仓'}]} onChange={setType}/></>,'fees-filters')}
  {anchor('warehouses',<Table rowKey="id" size="middle" pagination={false} scroll={{x:850}} locale={{emptyText:<Empty description="当前条件下暂无仓库费用"/>}} dataSource={filtered} columns={[{title:'仓库',width:175,render:(_,x)=><div className="warehouse-cell"><Button type="link" className="fees-name" onClick={()=>openWarehouse(x.id)}>{x.name}</Button><small>{x.id}</small></div>},{title:'仓库类型',dataIndex:'typeName',width:90},{title:'统计月份',width:130,dataIndex:'month'},{title:'完成单量',dataIndex:'docCount',width:95,align:'right'},{title:'计费节点',dataIndex:'nodeCount',width:90,align:'right'},{title:'总费用',width:160,align:'right',render:(_,x)=><><Button className="fees-money-link" type="link" onClick={()=>openWarehouse(x.id)} aria-label={x.name+'月度费用'}>{money(x.cents/100,x.currency)}</Button><small className="block">{x.currency}</small></>}]}/>,'fees-table')}
@@ -60,4 +63,5 @@ function Fees(){
  {w&&raw&&<Modal title="作业数据与计费依据" width={annot?'min(1050px, calc(100vw - 370px))':1050} open onCancel={()=>setRaw(null)} footer={<Button onClick={()=>setRaw(null)}>关闭</Button>} rootClassName={annot?'fees-raw-modal with-config-notes':'fees-raw-modal'}>{anchor('raw',<><Descriptions size="small" bordered column={2} items={[{key:'doc',label:'业务单据',children:raw.doc},{key:'node',label:'作业节点',children:nodes[raw.node]},{key:'date',label:'完成时间',children:raw.completedAt},{key:'version',label:'计价版本',children:'V'+raw.version+' · '+raw.versionDate+' 生效'},...(w.type==='self'?[{key:'person',label:'实际作业人',children:raw.person}]:[]),{key:'qty',label:'计费工作量',children:raw.quantityLabel||(raw.qty+' '+raw.unit)},{key:'formula',label:'计算公式',children:raw.formula},{key:'match',label:'取价结果',children:raw.matched},{key:'amount',label:'本笔费用',children:money(raw.cents/100,w.currency)}]}/><h3 className="fees-raw-title">原始作业记录 <small>{raw.originals.length} 条</small></h3><Table rowKey="id" size="small" pagination={false} scroll={{x:1450}} dataSource={raw.originals} columns={[{title:'记录ID',dataIndex:'id',width:230},{title:'任务',dataIndex:'task',width:220},{title:'SKU',dataIndex:'sku',width:90},{title:'实际件数',dataIndex:'qty',width:85},{title:'包裹号',dataIndex:'parcel',width:220},{title:'箱号',dataIndex:'box',width:220},{title:'库位',dataIndex:'location',width:80},{title:'交运袋号',dataIndex:'handoverBag',width:220},{title:'交运完成',width:90,render:(_,r)=>r.handedOver?'是':'否'},{title:'单件实重 kg',dataIndex:'unitWeight',width:100},{title:'单件长×宽×高 cm',width:160,render:(_,r)=>[r.length,r.width,r.height].join(' × ')}]}/></>)}</Modal>}
  </ConfigProvider>
 }
-createRoot(document.getElementById('root')).render(<Fees/>);
+function Finance(){const[mode,M]=useState(()=>['income','profit'].includes(new URLSearchParams(location.search).get('ledger'))?new URLSearchParams(location.search).get('ledger'):'cost'),[month,SM]=useState(previousMonth),[selected,SW]=useState(null),[dateRange,DR]=useState(null);const props={onModeChange:M,month,setMonth:v=>{SM(v);DR(null)},selected,setSelected:SW,dateRange,setDateRange:DR};return mode==='cost'?<Fees {...props}/>:<IncomeProfit {...props} mode={mode}/>};
+createRoot(document.getElementById('root')).render(<Finance/>);
