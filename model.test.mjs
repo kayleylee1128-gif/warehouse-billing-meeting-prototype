@@ -19,3 +19,5 @@ test('returns excludes box units and return type conditions including stored dat
 
 import{calculatePack}from'./model.mjs';
 test('pack price requires every condition and selects first matching row',()=>{const r=fresh('pack');r.packMatrix={defaultPrice:.1,rows:[{conditions:[{dimension:'单内件数',min:1,max:10},{dimension:'单内款数',min:1,max:2}],price:.5},{conditions:[{dimension:'单内件数',min:1,max:10}],price:.3}]};assert.equal(validate(r),'');assert.equal(calculatePack(r,2,{'单内件数':6,'单内款数':2}),1);assert.equal(calculatePack(r,2,{'单内件数':6,'单内款数':3}),.6);assert.equal(calculatePack(r,2,{'单内件数':20,'单内款数':2}),.2);r.packMatrix.rows[0].conditions.push({dimension:'单内款数',min:1,max:3});assert.match(validate(r),/重复/)});
+
+test('pack allows only parcels and items, including old browser records',()=>{assert.deepEqual(nodes.find(n=>n.id==='pack').units,['包裹','件']);assert.equal(fresh('pack').unit,'包裹');const r=directRule({...fresh('pack'),unit:'打包单'});assert.equal(r.unit,'包裹');assert.ok(r.packMatrix.rows.length)});
