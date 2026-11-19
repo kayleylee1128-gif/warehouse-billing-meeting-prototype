@@ -8,3 +8,7 @@ test('base price and continuation are one formula',()=>assert.equal(calculate({.
 
 import{rollover}from'./model.mjs';
 test('approval and effective date separately control active version',()=>{let w=initial();w[0].versions[1].audit='已通过';assert.equal(rollover(w,'2026-11-19')[0].versions[1].status,'待生效');const next=rollover(w,'2026-11-20')[0];assert.equal(next.versions[0].status,'已失效');assert.equal(next.versions[1].status,'生效中')});
+
+import{directRule,calculateQc}from'./model.mjs';
+test('QC charges styles and sampled items together, with independent prices',()=>{const r=fresh('qc');r.qcPrices.styles.bands[0].price=2;r.qcPrices.items.bands[0].price=.5;assert.deepEqual(calculateQc(r,{styles:3,items:8}),{styleAmount:6,itemAmount:4,total:10});r.qcPrices.items.bands[0].price=null;assert.match(validate(r),/抽检件数费用/)});
+test('QC migration retains previously maintained style price and supplies both sections',()=>{const r=directRule({id:'qc',unit:'质检款数',price:3,method:'按量计费',condition:'不分档',bands:[]});assert.equal(r.qcPrices.styles.price,3);assert.equal(r.qcPrices.styles.bands[0].price,3);assert.equal(r.qcPrices.items.unit,'实际抽检件数');assert.deepEqual(directRule(r),r)});
