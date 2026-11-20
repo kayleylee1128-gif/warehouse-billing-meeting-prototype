@@ -1,5 +1,5 @@
 import{fresh,calculatePick}from'./model.mjs';
-export const previousMonth=(date=new Date())=>{const s=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit'}).format(date),[y,m]=s.split('-').map(Number);return new Date(Date.UTC(y,m-2,1)).toISOString().slice(0,7)};
+export const previousMonth=(date=new Date())=>{const china=new Date(date.getTime()+8*60*60*1000);return new Date(Date.UTC(china.getUTCFullYear(),china.getUTCMonth()-1,1)).toISOString().slice(0,7)};
 export const money=(v,c='CNY')=>new Intl.NumberFormat('zh-CN',{style:'currency',currency:c,minimumFractionDigits:2,maximumFractionDigits:2}).format(v);
 export const addCents=rs=>rs.reduce((s,r)=>s+r.cents,0);
 const unique=(rs,k)=>new Set(rs.map(r=>r[k]).filter(Boolean)).size;
