@@ -1,3 +1,4 @@
+import{RuntimeBoundary}from'./runtime-boundary.jsx';
 import React,{useState,useMemo,useEffect}from'react';
 import{createRoot}from'react-dom/client';
 import{ConfigProvider,Button,Input,Select,Table,Tag,Segmented,Drawer,Modal,Descriptions,Empty,DatePicker}from'antd';
@@ -63,4 +64,4 @@ function Fees({onModeChange,month,setMonth,selected,setSelected,dateRange,setDat
  </ConfigProvider>
 }
 function Finance(){const[month,SM]=useState(previousMonth),[selected,SW]=useState(()=>new URLSearchParams(location.search).get('warehouse')||null),[dateRange,DR]=useState(null);return <Fees month={month} setMonth={v=>{SM(v);DR(null)}} selected={selected} setSelected={SW} dateRange={dateRange} setDateRange={DR}/>};
-createRoot(document.getElementById('root')).render(<Finance/>);
+createRoot(document.getElementById('root')).render(<RuntimeBoundary><Finance/></RuntimeBoundary>);

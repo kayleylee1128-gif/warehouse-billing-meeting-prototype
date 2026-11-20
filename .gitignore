@@ -1,2 +1,4 @@
 node_modules/
 .qa/
+
+.offline-build/
