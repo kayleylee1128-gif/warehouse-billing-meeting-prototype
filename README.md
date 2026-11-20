@@ -41,3 +41,5 @@
 加入双账本前的独立原型：https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/cost-only/index.html
 
 恢复标签：before-cost-income-20261119。恢复说明见 COST_INCOME_ROLLBACK.md。
+
+打包条件支持订单类型（速卖通仓发、速卖通JIT、其他所有）与原有条件组合。仓库费用统计详情新增打包工作量视图，按员工、类型、订单结构列出订单数、每单SKU去重累计款数、件数和工作量；工作量=订单数+款数+件数。支持订单追溯与导出，独立模拟作业数据不计入拣货费用或毛利。
