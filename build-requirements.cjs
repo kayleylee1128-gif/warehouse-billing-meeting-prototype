@@ -17,7 +17,7 @@ const permissions=[
 ['本人及组织人员数据','另行授予“查看组织人员数据”权限','本人＋授权组织及其下级组织内人员。组织范围沿用系统组织架构授权；不因同部门自动获得同事数据。'],
 ['全部用户数据','另行授予“仓库费用统计－查看全部用户数据”权限','可查看授权仓库内所有人员的数据。人员范围不受组织限制，仓库范围仍受仓库授权限制。']];
 const acceptance=[
-['配置与价格','添加授权仓库并配置11个成本节点','未添加仓库不出现；每节点一套规则。拣货、打包均为款数＋件数，上架、盘点仍为库位＋件数。'],
+['配置与价格','添加授权仓库并配置拣货、打包','未添加仓库不出现；本期仅两节点可配置、审批并生效。两节点均按款数＋件数收费。'],
 ['打包必填与多选','新增价格行，多选仓发、JIT，组合重量条件','三个必填条件自动展示且不可删除；任一选中类型命中后仍需满足件数、款数及可选条件。缺项、空类型或无效范围阻断提交。'],
 ['审批与并行版本','V1生效时提交V2，通过但未到生效时间','V1持续执行，V2独立显示；V2待生效，到时替换V1。计费记录和日志可追溯钉钉审批结果。'],
 ['拣货计算','同任务同SKU分布于多个库位；重复同步源记录','该SKU只计一款，件数按有效明细累计；重复同步不重复收费。2款、6件，0.30元/款、0.05元/件，合计0.90元。'],
@@ -26,20 +26,22 @@ const acceptance=[
 ['组织权限','主管获A组织及其下级范围，查询A、B组织人员','可见本人及A范围人员；B组织不可见。若某仓未获仓库授权，该仓仍不可见。'],
 ['全部用户权限','用户获得查看全部用户数据权限','授权仓库内可查所有人员；未授权仓库不可见。撤销该权限后，新请求恢复到组织范围或本人范围。'],
 ['越权与导出','修改员工ID、仓库ID或使用旧详情/下载链接','服务端拒绝越权；汇总、二级列表、流水和导出范围一致。导出跨分页，下载时重新校验权限。'],
-['异常与范围','无有效价格、关键数据缺失或其他节点尚未接入计费','受影响记录明确报异常，不生成伪0元费用；打包工作量可查，未核算金额不并入拣货费用。']];
+['打包计算','订单命中类型与数量范围，2款6件，每款0.20元、每件0.10元','打包费用1.00元，能追溯命中价格；与拣货费用分别归集，两者均计入授权范围内总费用。'],
+['扩展结构','设计评审新增上架节点的目录、数量、条件和数据来源映射','可复用配置、版本、审批、统一流水、权限和统计结构；无需改写拣货、打包规则。本期不要求实现上架业务。'],
+['异常与范围','无有效价格、关键数据缺失或未接入节点请求','受影响记录报异常，不生成伪0元费用；未接入节点不能产生费用或混入统计。']];
 const html=`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>仓库计费配置与费用统计｜需求评审稿</title><style>
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font:15px/1.8 "Microsoft YaHei",Arial,sans-serif;color:#24364b;background:#f4f6f9}a{color:#1765c7}aside{position:fixed;inset:0 auto 0 0;width:240px;background:white;border-right:1px solid #e0e6ed;padding:26px 20px;overflow:auto}aside strong{font-size:18px}aside small{display:block;color:#8090a2;margin:8px 0 24px}aside a{display:block;text-decoration:none;padding:7px 0;font-size:13px;color:#51667e}aside a:hover{color:#1765c7}main{margin-left:240px;max-width:1580px;padding:30px 38px}header{background:#193d65;color:white;padding:28px 32px;border-radius:10px}h1{margin:5px 0 12px;font-size:29px}header p{color:#d7e5f4;margin:6px 0}header small{color:#bdd1e8}section{background:white;padding:26px 30px;margin:22px 0;border:1px solid #e0e6ee;border-radius:9px;scroll-margin-top:20px}h2{font-size:23px;color:#214d78;margin:0 0 18px;padding-bottom:12px;border-bottom:1px solid #e1e7ef}h3{font-size:18px;color:#285580;margin:28px 0 12px;scroll-margin-top:20px}h4{font-size:15px;margin:18px 0 8px;color:#41607e}p{margin:10px 0}.table-wrap{overflow:auto;margin:14px 0}table{width:100%;border-collapse:collapse;font-size:13px;line-height:1.8}th,td{border:1px solid #dce5ef;padding:10px 12px;vertical-align:top;text-align:left}th{background:#eff4fa;color:#355875;white-space:nowrap}tr:nth-child(even){background:#fbfcfe}td:first-child{min-width:85px;font-weight:500}#nodes table{min-width:840px}#nodes th:last-child{width:57%}.key{padding:14px 18px;border-left:4px solid #387bc4;background:#eef5ff;margin:14px 0}.formula{background:#f3f7fc;padding:12px 16px;border-radius:5px;color:#22547e}.links{display:flex;gap:12px;flex-wrap:wrap}.links a{display:inline-block;border:1px solid #c9dcee;border-radius:5px;background:#f4f8ff;padding:8px 14px;text-decoration:none}button{float:right;border:1px solid #b8d0e8;background:#fff;padding:8px 12px;border-radius:5px;color:#27547b;cursor:pointer}.muted{font-size:13px;color:#718298}.scope{font-size:14px}.foot{color:#8392a4;text-align:center;font-size:12px;margin:24px}ul{padding-left:22px}li{margin:5px 0}@media(max-width:900px){aside{position:static;width:100%;max-height:250px}main{margin:0;padding:16px}section,header{padding:20px}h1{font-size:23px}}@media print{aside,button{display:none}main{margin:0;padding:0;max-width:none}body{background:white;font-size:11pt}header{background:white;color:#193d65;border-bottom:2px solid #193d65;padding:0 0 12px}header p,header small{color:#52677e}section{border:0;padding:8px 0;margin:12px 0}h2,h3,h4{break-after:avoid}tr{break-inside:avoid}table{font-size:9pt}.table-wrap{overflow:visible}#nodes table{min-width:0}.links a{border:0;padding:0}}
-</style></head><body><aside><strong>需求目录</strong><small>V3.0 · 2026-11-22</small><a href="#entry">原型入口</a><a href="#config">第一章　计费配置管理</a><a href="#list">1.1 仓库与账本</a><a href="#editor">1.2 配置操作</a><a href="#nodes">1.3 节点及计价条件</a><a href="#version">1.4 审批、计费记录与日志</a><a href="#statistics">第二章　数据与费用统计</a><a href="#permission">2.1 数据权限</a><a href="#source">2.2 获取、清洗与计算</a><a href="#views">2.3 汇总与节点二级列表</a><a href="#export">2.4 明细与导出</a><a href="#acceptance">2.5 验收标准</a></aside><main><header><button onclick="window.print()">打印 / 另存PDF</button><small>需求评审稿 · V3.0</small><h1>仓库计费配置与费用统计</h1><p class="scope">完整维护成本与收入报价配置；首期正式费用计算仅拣货。打包提供作业工作量统计。</p><p>仓库费用统计按登录用户及授权人员范围展示。</p><small>2026-11-22</small></header>
-<section id="entry"><h2>原型入口</h2><div class="links"><a href="./index.html?v=17" target="_blank" rel="noopener">计费配置管理 ↗</a><a href="./fees.html?v=17" target="_blank" rel="noopener">仓库费用统计 ↗</a></div><p class="muted">原型用于页面与交互评审；生产系统的数据权限按2.1执行。原型中的演示数据不代表生产权限已经实现。</p></section>
+</style></head><body><aside><strong>需求目录</strong><small>V3.1 · 2026-11-23</small><a href="#entry">原型入口</a><a href="#config">第一章　计费配置管理</a><a href="#list">1.1 仓库配置</a><a href="#editor">1.2 配置操作</a><a href="#nodes">1.3 节点及计价条件</a><a href="#version">1.4 审批、计费记录与日志</a><a href="#statistics">第二章　数据与费用统计</a><a href="#permission">2.1 数据权限</a><a href="#source">2.2 获取、清洗与计算</a><a href="#views">2.3 汇总与节点二级列表</a><a href="#export">2.4 明细与导出</a><a href="#acceptance">2.5 验收标准</a></aside><main><header><button onclick="window.print()">打印 / 另存PDF</button><small>需求评审稿 · V3.1</small><h1>仓库计费配置与费用统计</h1><p class="scope">本期交付拣货、打包的计费配置、审批、取数、费用计算、统计及导出；其他节点按可扩展结构预留后续接入。</p><p>仓库费用统计按登录用户及授权人员范围展示。</p><small>2026-11-23</small></header>
+<section id="entry"><h2>原型入口</h2><div class="links"><a href="./index.html?v=17" target="_blank" rel="noopener">计费配置管理 ↗</a><a href="./fees.html?v=17" target="_blank" rel="noopener">仓库费用统计 ↗</a></div><p class="muted">原型用于页面与交互评审，含后续节点展示；本期交付范围以本文为准。生产系统的数据权限按2.1执行，演示数据不代表生产权限已经实现。</p></section>
 <section id="config"><h2>第一章　计费配置管理</h2>
-<article id="list"><h3>1.1 仓库与账本</h3><p>按仓库手动新增配置，只展示已添加且有权访问的仓库。新增时选择未添加仓库，取消不创建记录，已添加仓库不能重复选择。</p>${table(['区域','最终要求'],[
-['账本','同仓分“成本计费”和“收入计费”。各自维护价格、版本、钉钉审批和生效时间；互不覆盖。收入报价不由成本单价自动相加产生。'],
+<article id="list"><h3>1.1 仓库配置</h3><p>按仓库手动新增配置，只展示已添加且有权访问的仓库。新增时选择未添加仓库，取消不创建记录，已添加仓库不能重复选择。</p>${table(['区域','最终要求'],[
+['本期范围','仅交付拣货、打包成本计费。两节点共用仓库配置、版本、审批与统计能力；其他作业节点和收入报价不纳入本期功能交付。'],
 ['筛选','仓库名称/编码模糊查询；审核状态、版本状态分别筛选。默认全部；同一版本同时满足两个状态条件才命中。'],
 ['主列表','仓库、计费节点、当前版本/生效时间、审核/版本状态、变更版本、最近更新、操作。最近更新一列显示人员和时间；只列节点名称，价格从查看进入。'],
 ['多版本','每仓一行。生效V1持续显示，审批中或待生效V2在变更版本列独立展示，点击进入对应版本。未审批的新版本不覆盖当前执行版本；无生效版时展示最新配置。'],
 ['操作','查看、改价/继续编辑、计费记录、日志。已有草稿或驳回版本继续编辑；有审批中或待生效版本时先处理该版本，不重复创建并行变更。']])}</article>
-<article id="editor"><h3>1.2 配置操作</h3><p>生效时间只设开始日期，最早次日00:00，不设终止时间。新版本实际生效时，旧版本自动失效。</p><p>添加节点支持分组、搜索和多选，已添加项禁选。每个节点维护一套计价规则；一套规则可含多行条件价格。节点切换保留输入，移除节点需确认。</p><p>条件在左、价格在右，两区样式区分。选择单位后直接维护对应范围及价格；仅有一种计量方式时不重复提供选择。保存草稿允许不完整；提交审批须有节点、全部必填价格与条件有效，并填写调整原因。保存失败保留输入。</p></article>
-<article id="nodes"><h3>1.3 节点及计价条件</h3><h4>成本计费</h4>${table(['大类','节点','计费数量','价格与条件'],nodes)}
+<article id="editor"><h3>1.2 配置操作</h3><p>生效时间只设开始日期，最早次日00:00，不设终止时间。新版本实际生效时，旧版本自动失效。</p><p>本期可添加拣货、打包，支持搜索和多选，已添加项禁选。节点目录支持按作业大类扩展。每个节点维护一套计价规则；一套规则可含多行条件价格。节点切换保留输入，移除节点需确认。</p><p>条件在左、价格在右，两区样式区分。选择单位后直接维护对应范围及价格；仅有一种计量方式时不重复提供选择。保存草稿允许不完整；提交审批须有节点、全部必填价格与条件有效，并填写调整原因。保存失败保留输入。</p></article>
+<article id="nodes"><h3>1.3 节点及计价条件</h3><h4>成本计费</h4>${table(['大类','节点','计费数量','价格与条件'],nodes.filter(n=>['拣货','打包'].includes(n[1])))}
 <h4>打包价格行</h4>${table(['字段','规则'],[
 ['计费公式','打包费用＝打包款数×每款单价＋打包件数×每件单价。款数按每单SKU去重；件数为实际完成数量。'],
 ['订单类型（必填）','支持多选：速卖通仓发、速卖通JIT、其他所有。选中类型任一命中即可；“其他所有”仅指前两类之外的订单，不包含类型缺失。'],
@@ -47,11 +49,19 @@ const html=`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta 
 ['可选条件','单内商品最大实重、单内商品最大体积，可添加、删除、组合；同一行不重复选择相同条件。全部条件同时满足才命中。'],
 ['收费价格','每行维护元/款、元/件两列；同一命中行的两项费用相加，不跨行累加。']])}
 <h4>通用价格规则</h4><p>按价格行从上到下使用首个命中价格，可调整顺序。实重、体积、尺寸按“下限不含、上限含”；数量范围含上下限。属性统一为kg、m³、cm。未命中使用“其他情况”价格；源数据缺失须报异常，不能冒充未命中。</p><p>单价可为0，不得为负；展示和保存价格精度一致。基础费＋续件费仅在支持的单位下显示：包含数量为正整数，费用＝基础费＋超出包含数量的件数×续件费。固定每单价通过计量单位表达。</p>
-<h4>收入计费</h4><p>维护仓库通用服务报价，各服务一套规则；当前统计模块只展示成本费用。</p>${table(['服务','计量单位','条件与归集'],[
+<h4>后续接入结构</h4><p>开发设计须支持新增节点、计费数量和条件组合，不将流程、页面字段或统计表结构写死为两个节点。后续节点通过统一结构接入，本期不开发其配置页面、取数及计算功能。</p>
+${table(['扩展对象','设计要求'],[
+['节点目录','统一维护节点标识、名称、作业大类和启用状态；本期只启用拣货、打包。后续上架、收货等复用相同仓库和版本流程。'],
+['规则结构','节点分别定义计费数量、必填/可选条件、单价组成和匹配规则。保留按件、款、库位、包裹、袋等数量，以及按单、按量、基础续件、库龄段等规则的扩展位置；不要求本期实现全部算法。'],
+['取数与计算','每节点独立映射来源单据、完成状态、人员、数量和属性，再输出统一作业记录与费用流水。接入新节点不改变已有节点的计算及去重结果。'],
+['统一流水','保留仓库、节点、业务类型、源任务/订单、人员、完成时间、数量明细、规则版本、命中价格、公式、币种和金额；不同节点使用相同统计及权限边界。'],
+['统计与权限','节点列举、汇总、人员下钻和导出按已接入节点读取。节点专属二级字段独立定义；新节点沿用本人、组织人员及全部用户的数据权限。'],
+['成本与收入','预留成本/收入业务维度，分别维护规则与版本；未来收入报价不直接等于成本合计。本期仅实现成本。']])}
+<details><summary>后续节点参考（不属于本期交付及验收）</summary>${table(['大类','节点','计费数量','价格与条件'],nodes.filter(n=>!['拣货','打包'].includes(n[1])))}<h4>收入服务参考</h4><p>仓库通用服务报价按独立业务维度接入，复用仓库、版本和审批结构。</p>${table(['服务','计量单位','条件与归集'],[
 ['入库操作费','入库单、箱、件','可按单内件数、款数或商品最大实重、体积维护范围价格；入库完成归集。关联收货、质检、贴标、上架。'],
 ['出库操作费','出库单、包裹、件','同类数量和商品属性范围价格；交运完成归集。关联拣货、打包、扫描、出库。'],
 ['退件处理费','退件单、件','单件实重或体积范围；退件处理完成归集，关联退件处理。'],
-['仓储费','m³·天、托·天、件·天','按库龄段维护单价，以每日库存快照归集。库龄来自独立库龄计算配置，本页只维护价格。']])}</article>
+['仓储费','m³·天、托·天、件·天','按库龄段维护单价，以每日库存快照归集。库龄来自独立库龄计算配置，本页只维护价格。']])}</details></article>
 <article id="version"><h3>1.4 审批、计费记录与日志</h3>${table(['对象','要求'],[
 ['钉钉审批','新增及改价提交后发起钉钉审批。提交版本只读，保存原配置快照和调整原因；审批结果按流程回写，不允许前端直接设为通过。重复回调不得重复生效。'],
 ['审核状态','草稿、审批中、已通过、已驳回。驳回保留原因，可编辑后重新提交。'],
@@ -71,18 +81,20 @@ const html=`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta 
 ['去重与校验','仓库＋任务/订单ID识别作业，源明细ID去重。排除未完成、撤销记录。缺操作人、完成时间、SKU、有效数量或计价所需属性时进入异常。'],
 ['人员归属','费用归属实际作业人，不能用分配人或创建人代替。拣货同任务由一人操作；人员归属不明的数据不生成正常费用。'],
 ['拣货款数与件数','同仓库＋拣货任务内，相同SKU只计一款，即使跨多个库位也不重复计款。件数累计有效明细完成数；商品属性按SKU匹配价格。'],
-['费用计算','按任务完成时间取有效拣货价格。各SKU款数费和件数费相加，汇总为该任务一笔综合费用。保存版本、命中价格、数量、单价、公式和源记录引用。'],
+['拣货费用','按任务完成时间取有效拣货价格。各SKU款数费和件数费相加，汇总为该任务一笔综合费用。'],
+['打包费用','按打包完成时间取有效打包价格。以订单类型、单内件数、单内款数及已配置可选条件匹配价格行；每单SKU去重款数×每款单价＋实际打包件数×每件单价，生成该订单打包费用。'],
+['费用留存','拣货、打包均保存节点、来源业务标识、版本、命中条件、数量、单价、公式及源记录引用。去重键包含仓库、节点和来源作业标识，两个节点独立收费、互不抵消。'],
 ['重复与异常','重复获取或计算不得重复收费。有效0价保留工作量；缺有效版本、缺关键属性、数量为负等不能默认按0元成功，也不能套用当前新价。'],
-['首期范围','仅拣货产生正式费用。打包可展示工作量，费用未核算时显示“未核算”，不计入金额合计；其他节点配置可维护，不生成伪0元流水。']])}<div class="formula">计算示例：同任务2款、6件，每款0.30元、每件0.05元，费用＝2×0.30＋6×0.05＝0.90元。</div></article>
+['本期范围','拣货、打包均产生正式费用并纳入统计和导出。未接入节点不开放业务操作、不生成费用流水，也不以0元占位。']])}<div class="formula">计算示例：同任务2款、6件，每款0.30元、每件0.05元，费用＝2×0.30＋6×0.05＝0.90元。</div></article>
 <article id="views"><h3>2.3 汇总与节点二级列表</h3><p>仓库总览默认上月，支持月份、仓库名称/编码、仓库类型筛选。列表展示仓库、仓库类型、统计月份、已核算完成单量、计费节点和总费用。金额按币种分别汇总；同一单据去重计单量。</p><p>点击仓库进入详情，支持完成日期范围、员工、作业节点筛选。按节点/按员工切换保留筛选；所有结果受2.1限制。筛选范围费用、已核算单量和参与人数均从当前可见的已核算流水计算。</p>${table(['视图/入口','展示与动作'],[
 ['按节点','节点、完成单量、各计量维度工作量、费用。点击拣货或打包行展开二级人员列表，再点可收起；点击费用打开流水明细。'],
 ['拣货二级列表','员工、工号、订单数、SKU款数、SKU件数、工作量、总工作量，共7列。按员工汇总，不展示订单类型和订单件型。'],
 ['打包二级列表','员工、工号、订单类型、订单件型、订单数、SKU款数、SKU件数、工作量、总工作量，共9列。按员工→订单类型→订单件型展示，合并重复员工及类型单元格。可继续筛订单类型、订单件型，点击订单数查看源订单。'],
 ['按员工','员工、完成单量、参与节点及费用；仅展示可见人员，点击费用进入该员工流水。'],
-['工作量口径','订单数按当前员工、节点及业务单据去重；SKU款数按每单SKU去重后累加，SKU件数为实际完成件数。工作量＝订单数＋SKU款数＋SKU件数。该款数是订单统计口径，拣货收费款数按任务口径执行。'],
+['工作量口径','订单数按当前员工、节点及业务单据去重；SKU款数按每单SKU去重后累加，SKU件数为实际完成件数。工作量＝订单数＋SKU款数＋SKU件数。该款数是订单统计口径，拣货收费款数按任务口径、打包收费款数按订单口径执行。'],
 ['订单件型与总工作量','单品＝1款1件；单品多件＝1款多件；多品＝多款。总工作量为同员工、同节点、当前全部筛选下各行工作量之和；合并单元格展示，不再次累加。']])}</article>
 <article id="export"><h3>2.4 明细与导出</h3><p>费用明细继承仓库、日期、节点、人员范围，支持按业务单据查询。展示完成时间、单据、员工、节点、款数/件数、计价版本与金额；点击单据查看源任务、SKU、原始记录、公式和单价。历史费用只读，返回保留筛选。</p><p>节点汇总、员工汇总、节点人员工作量、打包订单明细和费用流水分别提供导出。导出当前筛选与权限范围内的全部结果，跨分页，不依赖节点是否展开；未核算作业不混入已核算费用导出。CSV使用UTF-8并正确转义，文件名含仓库、月份和类型。空结果禁用；失败可重试，不静默截断。</p><p>查询失败保留筛选条件；无记录显示空态。计算异常保留源记录和原因。权限拒绝、加载失败与无数据分别反馈，不将失败显示成0元或计算成功。</p></article>
-<article id="acceptance"><h3>2.5 验收标准</h3>${table(['场景','前置条件/动作','可观察结果'],acceptance)}</article></section><div class="foot">仓库计费配置与费用统计 · 需求评审稿 · 2026-11-22</div></main></body></html>`;
+<article id="acceptance"><h3>2.5 验收标准</h3>${table(['场景','前置条件/动作','可观察结果'],acceptance)}</article></section><div class="foot">仓库计费配置与费用统计 · 需求评审稿 · 2026-11-23</div></main></body></html>`;
 fs.writeFileSync('docs/requirements.html',html);
-const dir='C:/Users/Jing/Documents/工作室/outputs';fs.mkdirSync(dir,{recursive:true});fs.writeFileSync(dir+'/仓库计费配置与费用统计需求文档_20261122.html',html.replace('href="./index.html?v=17"','href="https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/index.html?v=17"').replace('href="./fees.html?v=17"','href="https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/fees.html?v=17"'));
+const dir='C:/Users/Jing/Documents/工作室/outputs';fs.mkdirSync(dir,{recursive:true});fs.writeFileSync(dir+'/仓库计费配置与费用统计需求文档_20261123.html',html.replace('href="./index.html?v=17"','href="https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/index.html?v=17"').replace('href="./fees.html?v=17"','href="https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/fees.html?v=17"'));
 console.log('已生成需求评审稿');

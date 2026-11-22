@@ -48,4 +48,4 @@
 
 订单类型支持多选（组内任一命中），仍与其他必填和可选条件且匹配。在线页面内置完整脚本与样式，不依赖二次资源下载；保留历史资源以兼容旧页面；界面运行异常提供错误信息及重新加载入口。离线包 warehouse-billing-offline.zip 包含完整配置与费用统计两个HTML，解压打开 index.html，无需联网加载资源。
 
-最新需求评审稿：https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/requirements.html （2026-11-22，含仓库费用统计数据权限）。
+最新需求评审稿：https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/requirements.html （2026-11-23，本期仅拣货、打包，含数据权限及后续节点扩展要求）。
