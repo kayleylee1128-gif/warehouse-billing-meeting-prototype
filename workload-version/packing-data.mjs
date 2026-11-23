@@ -1,0 +1,2 @@
+import{orderTypes}from'./model.mjs';
+export function packingRecords(month,warehouse){const days=new Date(+month.slice(0,4),+month.slice(5,7),0).getDate();return Array.from({length:days},(_,d)=>['示例员工甲','示例员工乙','示例员工丙'].flatMap((person,p)=>orderTypes.flatMap((type,t)=>['单品','单品多件','多品'].map((structure,k)=>({id:`PACK-${warehouse}-${month}-${d+1}-${p}-${t}-${k}`,date:`${month}-${String(d+1).padStart(2,'0')} 16:00:00`,person,number:String(20045+p),team:'出库组 / 打包员',type,structure,styles:k===2?2:1,items:k===0?1:k===1?4:5}))))).flat()}
