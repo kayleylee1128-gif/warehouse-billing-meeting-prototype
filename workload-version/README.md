@@ -15,3 +15,5 @@
 新版：[配置](https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/workload/index.html?v=1)、[统计](https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/workload/fees.html?v=1)。
 
 原版：[配置](https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/index.html?v=18)、[统计](https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/fees.html?v=18)。
+
+最新需求：[成本工作量计费需求评审稿 V4.0](https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/workload/requirements.html?v=4)。本期仅成本拣货、打包，包含数据权限与后续模块扩展要求。运行 `node build-requirements.cjs` 生成在线及本地HTML文件。
