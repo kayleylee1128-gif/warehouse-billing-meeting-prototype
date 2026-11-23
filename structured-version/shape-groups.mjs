@@ -1,0 +1,3 @@
+export function shapeGroups(rows){const groups=new Map();rows.forEach((r,i)=>{const id=r.groupId||'types:'+JSON.stringify([...r.types].sort());if(!groups.has(id))groups.set(id,{id,types:r.types,indices:[]});groups.get(id).indices.push(i)});return [...groups.values()]}
+export function setGroupTypes(rows,group,types){return rows.map((r,i)=>group.indices.includes(i)?{...r,types:[...types],groupId:group.id}:r)}
+export function addWeightRange(rows,index){const r=rows[index];if(r.max===null)throw Error('请先填写本行实重上限，再添加后续范围');const id=r.groupId||'types:'+JSON.stringify([...r.types].sort()),next={types:[...r.types],groupId:id,shape:r.shape,min:r.max,max:null,itemPrice:null,...(r.shape==='多品'?{stylePrice:null}:{})};return [...rows.slice(0,index+1),next,...rows.slice(index+1)]}

@@ -1,6 +1,6 @@
 # 订单件型计费版
 
-逐条规则维护：左侧直接选择订单类型（多选）、订单件型，并输入最大单件实重上下限；右侧维护对应价格。不使用固定九项，不设置基础价格或实重条件子行。新增规则直接展示全部输入。
+按订单类型分组维护：左侧选择类型（多选），右侧选择件型、直接填写实重范围和价格。可新增件型规则，或在已有件型下追加重量范围；追加前先填写本行上限。组内全部行共用左侧类型，不重复选择。
 
 单品为1款1件，单品多件为1款多件，两者只维护每件单价；多品维护每款、每件单价并相加。实际件型从SKU款数和件数判断，配置中不填写款数、件数范围。
 
@@ -12,4 +12,4 @@
 
 构建：`node build-structured.cjs`。检查：`node --test structured-version/shape.test.mjs`。
 
-[配置](https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/structured/index.html?v=3) · [统计](https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/structured/fees.html?v=3)
+[配置](https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/structured/index.html?v=4) · [统计](https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/structured/fees.html?v=4)
