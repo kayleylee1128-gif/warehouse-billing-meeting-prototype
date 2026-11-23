@@ -2,7 +2,7 @@
 
 基于保留的直接单价版独立生成，使用独立浏览器存储 billing-structured-v1；原版及工作量计费版保持不变。
 
-打包按订单类型进入，再选单品、单品多件、多品。单品为1款1件，单品多件为1款多件，两者只维护每件单价；多品维护每款、每件单价并相加。件型从实际SKU款数和件数判断，配置中不再填写款数、件数范围。
+打包按项直接列出订单类型与单品、单品多件、多品组合；左侧条件、右侧价格，不使用顶部页签切换。单品为1款1件，单品多件为1款多件，两者只维护每件单价；多品维护每款、每件单价并相加。件型从实际SKU款数和件数判断，配置中不再填写款数、件数范围。
 
 三种订单类型各有三个固定件型，共九组基础价格。新增配置价格留空，九组必填；已通过版本展示虚构示例价格。最大单件实重可维护不重叠区间，未命中使用该组基础价格。缺源属性不能使用基础价格冒充匹配。
 
@@ -12,4 +12,4 @@
 
 构建：`node build-structured.cjs`。检查：`node --test structured-version/shape.test.mjs`。
 
-[配置](https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/structured/index.html?v=1) · [统计](https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/structured/fees.html?v=1)
+[配置](https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/structured/index.html?v=2) · [统计](https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/structured/fees.html?v=2)
