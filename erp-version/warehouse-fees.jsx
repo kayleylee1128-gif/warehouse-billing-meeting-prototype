@@ -11,7 +11,7 @@ import{Nav,Annotations}from'./prototype-ui.jsx';
 import{previousMonth,buildMonth,money,aggregate,addCents,filterCharges}from'./monthly-fees.mjs';
 const overviewNotes=[
  ['page','仓库月度费用总览','页面','仓库主管和财务从左侧仓库费用统计进入。默认上一个自然月，按作业完成日期归月；仓库总览下钻至节点/员工，再进入费用流水和原始记录。当前展示自建仓拣货、打包费用。月账使用独立归档示例价，与配置页浏览器草稿不联动，未连接真实WMS。'],
- ['filters','统计月份与仓库筛选','字段','月份必填，默认北京时间上月，不可选本月或未来。仓库名称/编码、仓库类型可选，默认全部。筛选即时生效，金额及数量仅统计当前结果。月份变更清空下钻状态；任意历史月均为演示数据，并非真实历史采集。'],
+ ['filters','统计月份与仓库筛选','字段','月份必填，默认北京时间上月，不可选本月或未来。仓库名称/编码、仓库类型可选，默认全部。筛选即时生效，金额及数量仅统计当前结果。月份变更清空下钻状态；'],
  ['warehouses','仓库费用列表','交互','仓库一行，不再显示费用口径。统计月份显示该行费用所属自然月，与顶部月份筛选一致（YYYY-MM），不是核算执行时间。总览直接展示仓库列表，不再提供费用合计和仓库数预览卡片。点击仓库名称或总费用进入该月仓库详情。完成单量在当前仓库跨节点按业务单据ID去重；本期计算拣货、打包，完成任务按业务单据去重。无记录时显示空态，不套用示例金额。单量与件数、包裹数和费用流水笔数分别计算。']
 ];
 const warehouseNotes=[
@@ -44,7 +44,7 @@ function Fees({onModeChange,month,setMonth,selected,setSelected,dateRange,setDat
  const amountLink=(cents,action,label)=><Button type="link" className="fees-money-link" aria-label={label} onClick={action}>{money(cents/100,w?.currency||'CNY')}</Button>;
  const work=rs=><div className="fees-work">{rs.map((r,i)=><span key={i}>{r.rule}<b>{Number(r.qty.toFixed(4)).toLocaleString('zh-CN')} <small>{r.unit}</small></b></span>)}</div>;
  const groupScope=r=>group==='node'?{node:r.id}:{person:r.id};
- return <ConfigProvider locale={zhCN} theme={{token:{colorPrimary:'#2563eb',borderRadius:6,fontSize:13,fontFamily:'Inter,"Microsoft YaHei",sans-serif'},components:{Table:{headerBg:'#f7f9fc'}}}}><div className={'config-app lab-app fees-app '+(annot?'annotated':'')}><Nav active="fees"/><div className="cfg-work"><header className="cfg-top"><span>仓库管理 / 仓库费用统计{w?' / '+w.name:''}</span><div><Tag>订单件型计费示例</Tag><Button onClick={()=>setAnnot(!annot)}>{annot?'关闭标注':'开启标注'}</Button></div></header><main className="cfg-main">
+ return <ConfigProvider locale={zhCN} theme={{token:{colorPrimary:'#2563eb',borderRadius:6,fontSize:13,fontFamily:'Inter,"Microsoft YaHei",sans-serif'},components:{Table:{headerBg:'#f7f9fc'}}}}><div className={'config-app lab-app fees-app '+(annot?'annotated':'')}><Nav active="fees"/><div className="cfg-work"><header className="cfg-top"><span>仓库管理 / 仓库费用统计{w?' / '+w.name:''}</span><div><Button onClick={()=>setAnnot(!annot)}>{annot?'关闭标注':'开启标注'}</Button></div></header><main className="cfg-main">
  {anchor('page',<><div>{w&&<Button type="text" className="fees-back" onClick={()=>{setSelected(null);setScope(null);setRaw(null)}}>← 仓库列表</Button>}<h1>{w?w.name:'仓库费用统计'}</h1>{w&&<Tag>{w.typeName}</Tag>}</div><span className="fees-month-title">{month} · 月度费用</span></>,'fees-heading')}
  {!w?<>
  {anchor('filters',<><label>统计月份<input aria-label="统计月份" type="month" value={month} max={previousMonth()} onChange={e=>{if(/^\d{4}-(0[1-9]|1[0-2])$/.test(e.target.value)&&e.target.value<=previousMonth())setMonth(e.target.value)}}/></label><Input aria-label="查询费用仓库" allowClear value={query} placeholder="仓库名称 / 编码" onChange={e=>setQuery(e.target.value)} style={{width:210}}/><Select aria-label="仓库类型" value={type} style={{width:130}} options={[{value:'all',label:'全部仓库类型'},{value:'self',label:'自建仓'}]} onChange={setType}/></>,'fees-filters')}
