@@ -12,8 +12,10 @@
 
 构建：`node build-structured.cjs`。检查：`node --test structured-version/shape.test.mjs`。
 
-[配置](https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/structured/index.html?v=6) · [统计](https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/structured/fees.html?v=6)
+[配置](https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/structured/index.html?v=7) · [统计](https://kayleylee1128-gif.github.io/warehouse-billing-meeting-prototype/structured/fees.html?v=7)
 
 维护界面采用订单类型 → 件型 → 重量范围三层结构。同组可添加三种不同件型，每个件型只选择一次，下方范围表可连续追加，价格逐行独立。删除范围与删除整个件型分别确认。
 
 件型栏底部与组标题均提供添加件型菜单，仅列出当前组尚未使用的件型。
+
+拣货按难度分组维护重量范围与每款、每件价格，保留其他情况价格。统一配置、统计及弹窗视觉；未保存修改离开前确认。列表维护操作突出，计费记录和日志统一放入更多菜单。
