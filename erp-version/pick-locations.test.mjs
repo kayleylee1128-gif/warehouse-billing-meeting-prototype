@@ -1,0 +1,5 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {fresh,calculatePick,directRule,validate} from './model.mjs';
+test('picking adds location charge and preserves existing price components',()=>{const r=fresh('pick');Object.assign(r.pickMatrix.rows[0],{difficulty:'容易',locationPrice:.5});assert.deepEqual(calculatePick(r,{locations:2,styles:1,items:3,weight:.4,difficulty:'容易'}),{locationAmount:1,styleAmount:.1,itemAmount:.3,total:1.4});assert.equal(directRule(r).pickMatrix.rows[0].locationPrice,.5);r.pickMatrix.locationDefault=.25;assert.equal(calculatePick(r,{locations:2,styles:1,items:3,weight:2,difficulty:'容易'}).total,.9);r.pickMatrix.rows[0].locationPrice=-1;assert.match(validate(r),/库位/)});
+test('legacy picking prices retain original amount with zero location price',()=>{const r=fresh('pick');r.pickMatrix.rows[0].difficulty='容易';delete r.pickMatrix.rows[0].locationPrice;delete r.pickMatrix.locationDefault;assert.equal(calculatePick(r,{locations:9,styles:1,items:3,weight:.4,difficulty:'容易'}).total,.4)});
